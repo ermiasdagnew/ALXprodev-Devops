@@ -1,8 +1,13 @@
 #!/bin/bash
+# Task 5: Parallel Pokémon fetching with job control
+
 pokemons=("bulbasaur" "ivysaur" "venusaur" "charmander" "charmeleon")
 OUTPUT_DIR="pokemon_data"
 ERROR_LOG="errors.txt"
+
 mkdir -p "$OUTPUT_DIR"
+
+# Fetch each Pokémon in background
 for p in "${pokemons[@]}"; do
     (
         curl -s -f "https://pokeapi.co/api/v2/pokemon/$p" -o "$OUTPUT_DIR/$p.json"
@@ -13,5 +18,21 @@ for p in "${pokemons[@]}"; do
         fi
     ) &
 done
-wait
+
+# Get PIDs of all background jobs
+PIDS=$(jobs -p)
+
+# Wait for all background processes to complete
+for pid in $PIDS; do
+    wait $pid || echo "Process $pid failed"
+done
+
+# Extra safety: kill any leftover background jobs (rare case)
+for pid in $PIDS; do
+    if kill -0 $pid 2>/dev/null; then
+        kill $pid
+        echo "Killed leftover process $pid"
+    fi
+done
+
 echo "All parallel fetches completed!"
