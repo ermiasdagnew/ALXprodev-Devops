@@ -1,0 +1,17 @@
+#!/bin/bash
+pokemons=("bulbasaur" "ivysaur" "venusaur" "charmander" "charmeleon")
+OUTPUT_DIR="pokemon_data"
+ERROR_LOG="errors.txt"
+mkdir -p "$OUTPUT_DIR"
+for p in "${pokemons[@]}"; do
+    (
+        curl -s -f "https://pokeapi.co/api/v2/pokemon/$p" -o "$OUTPUT_DIR/$p.json"
+        if [ $? -eq 0 ]; then
+            echo "Saved data to $OUTPUT_DIR/$p.json ✅"
+        else
+            echo "$(date) - Failed to fetch $p" >> "$ERROR_LOG"
+        fi
+    ) &
+done
+wait
+echo "All parallel fetches completed!"
