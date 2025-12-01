@@ -1,7 +1,21 @@
 #!/bin/bash
+# Task 1: Extract Pikachu info (using jq, awk, sed)
+
 FILE="data.json"
+
+# Extract raw values with jq
 name=$(jq -r '.name' "$FILE")
 height=$(jq -r '.height' "$FILE")
 weight=$(jq -r '.weight' "$FILE")
 type=$(jq -r '.types[0].type.name' "$FILE")
-echo "${name^} is of type ${type^}, weighs ${weight}kg, and is ${height}m tall."
+
+# Format height and weight to 1 decimal place using awk
+formatted_height=$(echo "$height" | awk '{printf "%.1f", $1}')
+formatted_weight=$(echo "$weight" | awk '{printf "%.1f", $1}')
+
+# Capitalize first letter of name and type using sed
+name=$(echo "$name" | sed 's/.*/\u&/')
+type=$(echo "$type" | sed 's/.*/\u&/')
+
+# Print human-readable output
+echo "$name is of type $type, weighs ${formatted_weight}kg, and is ${formatted_height}m tall."
